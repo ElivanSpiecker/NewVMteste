@@ -1,7 +1,7 @@
 @php
     $navItems = [
         ['label' => 'CRIAR', 'route' => 'videos.create', 'icon' => 'plus-square'],
-        ['label' => 'DASH', 'route' => 'dashboard', 'icon' => 'layout-dashboard'],
+        ['label' => 'PAINEL', 'route' => 'dashboard', 'icon' => 'layout-dashboard'],
         ['label' => 'VÍDEOS', 'route' => 'videos.index', 'icon' => 'video'],
         ['label' => 'PIPELINE', 'route' => 'pipeline', 'icon' => 'workflow'],
         ['label' => 'CONFIG', 'route' => 'config', 'icon' => 'settings'],

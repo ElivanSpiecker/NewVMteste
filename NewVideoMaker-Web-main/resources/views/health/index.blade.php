@@ -8,7 +8,7 @@
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
             <h1 class="font-display text-4xl font-bold tracking-tight text-foreground lg:text-5xl">Serviços</h1>
-            <p class="mt-2 text-sm text-muted-foreground">Verificação dos serviços locais usados pelo pipeline.</p>
+            <p class="mt-2 text-sm text-muted-foreground">Status em tempo real dos serviços necessários para geração de vídeos.</p>
         </div>
         <span id="allStatus" class="rounded-sm px-3 py-2 font-display text-[10px] font-medium tracking-wider uppercase {{ collect($services)->every(fn($s) => $s['up']) ? 'bg-primary text-primary-foreground' : 'bg-destructive text-destructive-foreground' }}">
             {{ collect($services)->every(fn($s) => $s['up']) ? 'Tudo rodando' : 'Serviço offline' }}
@@ -33,7 +33,7 @@
     </div>
 
     <section class="card mt-8">
-        <h2 class="section-title">Comandos de apoio</h2>
+        <h2 class="section-title">Inicialização dos serviços</h2>
         <div class="mt-4 grid gap-4 lg:grid-cols-3">
             <div>
                 <p class="text-sm font-medium text-foreground">Ollama</p>

@@ -79,7 +79,7 @@ class GerarVideo implements ShouldQueue
         }
 
         $videoFile = "{$outputDir}\\video\\final_{$video->id}.mp4";
-        $srtFile   = "{$outputDir}\\audio\\narration.srt";
+        $srtFile   = "{$outputDir}\\audio\\legenda.srt";
 
         $video->update([
             'status'     => 'done',

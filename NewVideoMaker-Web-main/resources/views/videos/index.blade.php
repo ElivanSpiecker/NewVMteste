@@ -8,7 +8,7 @@
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
             <h1 class="font-display text-4xl font-bold tracking-tight text-foreground lg:text-5xl">Meus Vídeos</h1>
-            <p class="mt-2 text-sm text-muted-foreground">Histórico real dos vídeos criados pelo sistema.</p>
+            <p class="mt-2 text-sm text-muted-foreground">Todos os vídeos gerados na plataforma.</p>
         </div>
         <a href="{{ route('videos.create') }}" class="btn-primary">
             <i data-lucide="plus" class="h-4 w-4"></i>

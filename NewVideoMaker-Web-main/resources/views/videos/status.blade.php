@@ -47,7 +47,7 @@
             </ol>
 
             <div id="errorBox" class="mt-6 hidden rounded-sm border border-destructive/40 bg-destructive/10 p-4">
-                <p class="font-display text-sm font-semibold text-destructive">Falha no pipeline</p>
+                <p class="font-display text-sm font-semibold text-destructive">Falha na geração</p>
                 <pre id="errorText" class="mt-2 max-h-48 overflow-auto whitespace-pre-wrap text-xs text-destructive"></pre>
                 <a href="{{ route('videos.create') }}" class="mt-4 inline-flex text-xs font-semibold text-foreground hover:underline">Tentar novamente →</a>
             </div>
@@ -57,7 +57,7 @@
             <div class="card">
                 <h2 class="section-title">Status atual</h2>
                 <p id="sideStatusLabel" class="mt-4 font-display text-2xl font-semibold text-foreground">{{ $video->statusLabel() }}</p>
-                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">Esta tela consulta o backend a cada 3 segundos e redireciona automaticamente quando o vídeo estiver pronto.</p>
+                <p class="mt-2 text-sm leading-relaxed text-muted-foreground">O status é atualizado automaticamente. Você será redirecionado assim que o vídeo estiver pronto.</p>
             </div>
             <a href="{{ route('videos.index') }}" class="btn-outline w-full">Voltar aos vídeos</a>
         </aside>

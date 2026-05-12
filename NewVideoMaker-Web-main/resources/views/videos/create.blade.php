@@ -16,7 +16,7 @@
 
             <div>
                 <label class="form-label" for="tema">Tema do vídeo</label>
-                <input id="tema" type="text" name="tema" value="{{ old('tema') }}" maxlength="200" required placeholder="ex: café artesanal, futebol amador, inteligência artificial..." class="form-control">
+                <input id="tema" type="text" name="tema" value="{{ old('tema') }}" maxlength="200" required placeholder="ex: café artesanal, energia solar, música independente..." class="form-control">
                 @error('tema')
                     <p class="mt-1 text-xs text-destructive">{{ $message }}</p>
                 @enderror
@@ -39,24 +39,24 @@
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label class="form-label">Idioma</label>
-                    <select class="form-control" disabled>
+                    <select class="form-control opacity-60 cursor-not-allowed" title="Fixo nesta versão">
                         <option>Português PT-BR</option>
                     </select>
                 </div>
                 <div>
                     <label class="form-label">Formato</label>
-                    <select class="form-control" disabled>
+                    <select class="form-control opacity-60 cursor-not-allowed" title="Fixo nesta versão">
                         <option>Vídeo curto com legenda</option>
                     </select>
                 </div>
             </div>
 
             <div class="card bg-accent/60">
-                <h2 class="section-title">Observações</h2>
+                <h2 class="section-title">Antes de começar</h2>
                 <ul class="mt-3 space-y-2 text-sm leading-relaxed text-muted-foreground">
-                    <li>• O pipeline roda localmente via fila Laravel.</li>
-                    <li>• Verifique Ollama, ComfyUI e ACE-Step antes de gerar.</li>
-                    <li>• Após enviar, você será direcionado para o status do processamento.</li>
+                    <li>• A geração é feita localmente e pode levar entre 6 e 10 minutos.</li>
+                    <li>• Certifique-se de que todos os serviços estão ativos na tela <a href="{{ route('health.index') }}" class="underline hover:text-foreground">Serviços</a>.</li>
+                    <li>• Após enviar, você acompanha o progresso em tempo real.</li>
                 </ul>
             </div>
 
@@ -70,7 +70,7 @@
             <div class="card">
                 <h2 class="section-title">Pipeline</h2>
                 <div class="mt-5 space-y-4">
-                    @foreach ([['Roteiro', 'Gemma via Ollama'], ['Imagens', 'FLUX via ComfyUI'], ['Narração', 'Kokoro TTS'], ['Música', 'ACE-Step'], ['Montagem', 'MoviePy + FFmpeg']] as $step)
+                    @foreach ([['Roteiro', 'IA criativa local'], ['Imagens', 'Geração por difusão'], ['Narração', 'Síntese de voz'], ['Música', 'Composição generativa'], ['Montagem', 'Edição automatizada']] as $step)
                         <div class="flex items-start gap-3">
                             <span class="mt-1 h-2 w-2 rounded-full bg-foreground"></span>
                             <div>
@@ -86,7 +86,7 @@
                 <img src="{{ asset('assets/frame-1.jpg') }}" alt="Preview visual" class="h-56 w-full object-cover grayscale">
                 <div class="p-5">
                     <h2 class="font-display text-sm font-semibold text-foreground">NEW VideoMaker</h2>
-                    <p class="mt-2 text-xs leading-relaxed text-muted-foreground">Interface integrada ao backend Laravel existente, mantendo geração, status e downloads.</p>
+                    <p class="mt-2 text-xs leading-relaxed text-muted-foreground">Pipeline completo de geração, acompanhamento em tempo real e download em um só lugar.</p>
                 </div>
             </div>
         </aside>

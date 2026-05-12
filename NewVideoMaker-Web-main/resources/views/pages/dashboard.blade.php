@@ -14,7 +14,7 @@
 <div class="min-h-screen p-8 lg:p-12">
     <div class="animate-[fadeIn_.45s_ease-out]">
         <h1 class="font-display text-4xl font-bold tracking-tight text-foreground lg:text-5xl">Dashboard</h1>
-        <p class="mt-2 text-sm text-muted-foreground">Resumo do pipeline e dos vídeos gerados localmente.</p>
+        <p class="mt-2 text-sm text-muted-foreground">Resumo geral da atividade da plataforma.</p>
     </div>
 
     <div class="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -57,7 +57,7 @@
             <div class="flex items-center justify-between gap-4">
                 <div>
                     <h2 class="font-display text-xl font-semibold text-foreground">Últimos vídeos</h2>
-                    <p class="mt-1 text-xs text-muted-foreground">Acompanhamento dos jobs mais recentes.</p>
+                    <p class="mt-1 text-xs text-muted-foreground">Vídeos gerados mais recentemente.</p>
                 </div>
                 <a href="{{ route('videos.index') }}" class="btn-outline">Ver todos</a>
             </div>
@@ -97,7 +97,7 @@
             </div>
             <div class="card">
                 <h2 class="section-title">Atalho</h2>
-                <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Crie um novo vídeo informando tema e duração. O backend mantém a fila e a tela de status atualiza o progresso automaticamente.</p>
+                <p class="mt-3 text-sm leading-relaxed text-muted-foreground">Crie um novo vídeo informando tema e duração. A geração é feita automaticamente e você acompanha o progresso em tempo real.</p>
                 <a href="{{ route('videos.create') }}" class="btn-primary mt-5 w-full">Novo vídeo</a>
             </div>
         </section>

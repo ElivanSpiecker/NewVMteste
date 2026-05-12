@@ -13,7 +13,7 @@
         ['icon' => 'music', 'title' => 'Trilha sonora', 'tech' => 'ACE-Step 1.5', 'desc' => 'Modelo generativo cria música original para o vídeo.'],
         ['icon' => 'subtitles', 'title' => 'Legendas sincronizadas', 'tech' => 'Whisper', 'desc' => 'Modelo de transcrição gera legendas automaticamente.'],
         ['icon' => 'film', 'title' => 'Montagem final', 'tech' => 'FFmpeg / MoviePy', 'desc' => 'Composição de vídeo, áudio, música e legendas.'],
-        ['icon' => 'server', 'title' => 'Orquestração', 'tech' => 'Laravel', 'desc' => 'Backend gerencia todo o fluxo de processamento.'],
+        ['icon' => 'server', 'title' => 'Orquestração', 'tech' => 'Laravel', 'desc' => 'A plataforma coordena e sequencia todas as etapas do pipeline automaticamente.'],
     ];
     $features = [
         ['icon' => 'cpu', 'title' => 'Execução local', 'desc' => 'Todos os modelos rodam na sua máquina.'],
