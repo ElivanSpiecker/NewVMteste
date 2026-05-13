@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../**/*.vue';
+
+@theme {
+    --font-body: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+
+    --color-background: hsl(0 0% 98.5%);
+    --color-foreground: hsl(0 0% 13%);
+    --color-card: hsl(0 0% 100%);
+    --color-card-foreground: hsl(0 0% 13%);
+    --color-primary: hsl(0 0% 13%);
+    --color-primary-foreground: hsl(0 0% 98.5%);
+    --color-secondary: hsl(0 0% 95.5%);
+    --color-secondary-foreground: hsl(0 0% 13%);
+    --color-muted: hsl(0 0% 95.5%);
+    --color-muted-foreground: hsl(0 0% 50%);
+    --color-accent: hsl(0 0% 94%);
+    --color-accent-foreground: hsl(0 0% 13%);
+    --color-destructive: hsl(0 72% 51%);
+    --color-destructive-foreground: hsl(0 0% 98.5%);
+    --color-border: hsl(0 0% 90%);
+    --color-input: hsl(0 0% 90%);
+    --color-ring: hsl(0 0% 13%);
+    --color-surface: hsl(0 0% 97%);
+    --color-surface-foreground: hsl(0 0% 35%);
+    --color-chart-1: hsl(0 0% 13%);
+    --color-chart-2: hsl(0 0% 35%);
+    --color-chart-3: hsl(0 0% 55%);
+    --color-chart-4: hsl(0 0% 70%);
+    --color-chart-5: hsl(0 0% 85%);
+}
+
+@layer base {
+    * { border-color: var(--color-border); }
+    body { background: var(--color-background); color: var(--color-foreground); font-family: var(--font-body); }
+    h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); }
+}
+
+@layer components {
+    .form-label { @apply mb-1.5 block font-display text-xs font-medium tracking-wider text-muted-foreground uppercase; }
+    .form-control { @apply w-full rounded-sm border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-foreground; }
+    .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-sm bg-primary px-6 py-3 font-display text-xs font-medium tracking-wider text-primary-foreground uppercase transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50; }
+    .btn-outline { @apply inline-flex items-center justify-center gap-2 rounded-sm border border-border bg-card px-4 py-2 font-display text-xs font-medium tracking-wider text-foreground uppercase transition-colors hover:bg-accent; }
+    .card { @apply rounded-sm border border-border bg-card p-6; }
+    .section-title { @apply font-display text-xs font-medium tracking-wider text-muted-foreground uppercase; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
