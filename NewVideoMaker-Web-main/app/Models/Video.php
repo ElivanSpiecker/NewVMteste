@@ -9,6 +9,10 @@ class Video extends Model
     protected $fillable = [
         'tema',
         'duracao',
+        'imagens_modo',
+        'narracao_modo',
+        'musica_modo',
+        'legendas_modo',
         'status',
         'progresso',
         'erro',

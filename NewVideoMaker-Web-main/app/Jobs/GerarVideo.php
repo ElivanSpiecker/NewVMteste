@@ -39,16 +39,49 @@ class GerarVideo implements ShouldQueue
 
         $video->update(['status' => 'generating_script', 'progresso' => 5]);
 
+        $uploadDir = storage_path("app/uploads/{$video->id}");
+
+        $command = [
+            $pythonPath,
+            '-u', // unbuffered: marcadores STEP: chegam em tempo real
+            $pipelinePath,
+            '--tema',           $video->tema,
+            '--duracao',        (string) $video->duracao,
+            '--video-id',       (string) $video->id,
+            '--output-dir',     $outputDir,
+            '--imagens-modo',   $video->imagens_modo,
+            '--narracao-modo',  $video->narracao_modo,
+            '--musica-modo',    $video->musica_modo,
+            '--legendas-modo',  $video->legendas_modo,
+        ];
+
+        if ($video->imagens_modo === 'upload') {
+            $arquivos = glob("{$uploadDir}/imagens/cena*.*") ?: [];
+            sort($arquivos);
+            $command[] = '--imagens-upload';
+            $command[] = implode(';', $arquivos);
+        }
+
+        if ($video->narracao_modo === 'upload') {
+            $arquivos = glob("{$uploadDir}/narracao.*") ?: [];
+            $command[] = '--narracao-upload';
+            $command[] = $arquivos[0] ?? '';
+        }
+
+        if ($video->musica_modo === 'upload') {
+            $arquivos = glob("{$uploadDir}/musica.*") ?: [];
+            $command[] = '--musica-upload';
+            $command[] = $arquivos[0] ?? '';
+        }
+
+        if ($video->legendas_modo === 'upload') {
+            $arquivos = glob("{$uploadDir}/legenda.*") ?: [];
+            $command[] = '--legendas-upload';
+            $command[] = $arquivos[0] ?? '';
+        }
+
         $process = new Process(
-            command: [
-                $pythonPath,
-                '-u', // unbuffered: marcadores STEP: chegam em tempo real
-                $pipelinePath,
-                '--tema',        $video->tema,
-                '--duracao',     (string) $video->duracao,
-                '--video-id',    (string) $video->id,
-                '--output-dir',  $outputDir,
-            ],
+            command: $command,
             env: [
                 'PYTHONIOENCODING' => 'utf-8', // sem isso, emojis quebram em cp1252
                 'PYTHONUTF8'       => '1',

@@ -21,11 +21,67 @@ class ApiVideoController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'tema'    => ['required', 'string', 'max:200'],
-            'duracao' => ['required', 'integer', 'min:15', 'max:120'],
+            'tema'           => ['required', 'string', 'max:200'],
+            'duracao'        => ['required', 'integer', 'min:15', 'max:120'],
+            'imagens_modo'   => ['nullable', 'in:gerar,upload'],
+            'narracao_modo'  => ['nullable', 'in:gerar,upload,nenhum'],
+            'musica_modo'    => ['nullable', 'in:gerar,upload,nenhum'],
+            'legendas_modo'  => ['nullable', 'in:gerar,upload,nenhum'],
+            'imagens'        => ['required_if:imagens_modo,upload', 'array', 'min:1', 'max:20'],
+            'imagens.*'      => ['file', 'mimes:jpg,jpeg,png,webp,bmp', 'max:10240'],
+            'narracao'       => ['required_if:narracao_modo,upload', 'file', 'mimes:mp3,wav,m4a,ogg,aac,flac', 'max:51200'],
+            'musica'         => ['required_if:musica_modo,upload',   'file', 'mimes:mp3,wav,m4a,ogg,aac,flac', 'max:102400'],
+            'legendas'       => ['required_if:legendas_modo,upload', 'file', 'mimes:srt,vtt,txt',              'max:2048'],
         ]);
 
-        $video = Video::create($data);
+        $video = Video::create([
+            'tema'           => $data['tema'],
+            'duracao'        => $data['duracao'],
+            'imagens_modo'   => $data['imagens_modo']  ?? 'gerar',
+            'narracao_modo'  => $data['narracao_modo'] ?? 'gerar',
+            'musica_modo'    => $data['musica_modo']   ?? 'gerar',
+            'legendas_modo'  => $data['legendas_modo'] ?? 'gerar',
+        ]);
+
+        $uploadDir = storage_path("app/uploads/{$video->id}");
+
+        if (($data['imagens_modo'] ?? null) === 'upload') {
+            $destImg = "{$uploadDir}/imagens";
+            if (!is_dir($destImg)) {
+                mkdir($destImg, 0755, true);
+            }
+            foreach ($request->file('imagens', []) as $i => $file) {
+                $ext = strtolower($file->getClientOriginalExtension() ?: 'png');
+                $file->move($destImg, sprintf('cena%02d.%s', $i + 1, $ext));
+            }
+        }
+
+        if (($data['narracao_modo'] ?? null) === 'upload') {
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $file = $request->file('narracao');
+            $ext = strtolower($file->getClientOriginalExtension() ?: 'mp3');
+            $file->move($uploadDir, "narracao.{$ext}");
+        }
+
+        if (($data['musica_modo'] ?? null) === 'upload') {
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $file = $request->file('musica');
+            $ext = strtolower($file->getClientOriginalExtension() ?: 'mp3');
+            $file->move($uploadDir, "musica.{$ext}");
+        }
+
+        if (($data['legendas_modo'] ?? null) === 'upload') {
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $file = $request->file('legendas');
+            $ext = strtolower($file->getClientOriginalExtension() ?: 'srt');
+            $file->move($uploadDir, "legenda.{$ext}");
+        }
 
         GerarVideo::dispatch($video->id)->onQueue('video-generation');
 
