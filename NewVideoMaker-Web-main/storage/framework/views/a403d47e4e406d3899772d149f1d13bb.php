@@ -1,28 +1,41 @@
-<?php $__env->startSection('title', 'Sobre o Projeto — NEW VideoMaker'); ?>
-<?php $__env->startSection('description', 'Plataforma de geração autônoma de vídeos com IA local — TCC em Engenharia de Software.'); ?>
+<?php $__env->startSection('title', 'Sobre — NEW VideoMaker'); ?>
+<?php $__env->startSection('description', 'NEW VideoMaker — geração automatizada de vídeos com IA 100% local, sem assinatura, sem custo por geração.'); ?>
 
 <?php $__env->startSection('content'); ?>
 <?php
     $cards = [
         [
             'icon' => 'target',
-            'title' => 'Objetivo',
-            'content' => 'Desenvolver uma plataforma capaz de gerar vídeos curtos de forma completamente automatizada, utilizando exclusivamente modelos de inteligência artificial executados localmente, sem dependência de serviços em nuvem ou APIs externas.',
+            'title' => 'O produto',
+            'content' => 'NEW VideoMaker transforma um texto simples em vídeo completo — com imagens, narração, trilha sonora e legenda — de forma totalmente automatizada. Tudo roda na sua máquina, sem APIs externas, sem custo por geração.',
         ],
         [
             'icon' => 'layers',
-            'title' => 'Tecnologias',
-            'content' => 'FLUX.1 Schnell para imagens, Kokoro TTS para narração, ACE-Step 1.5 para música, Whisper para legendas, Gemma/Ollama como LLM, FFmpeg/MoviePy para montagem, Laravel para orquestração do pipeline.',
+            'title' => 'Stack de IA',
+            'content' => 'FLUX.1 Schnell para imagens cinematográficas, Kokoro TTS para narração natural, ACE-Step 1.5 para música original, Whisper para legendas sincronizadas, Gemma como diretor criativo via Ollama, MoviePy + FFmpeg para montagem final.',
         ],
         [
             'icon' => 'sparkles',
             'title' => 'Diferenciais',
-            'items' => ['Geração automatizada de vídeos completos', 'Execução totalmente local e offline', 'Privacidade total dos dados', 'Sem custos por geração', 'IA multimodal integrada', 'LLM como agente de direção criativa'],
+            'items' => [
+                'Geração completa de vídeo a partir de um único texto',
+                'Execução 100% local — sem nuvem, sem internet obrigatória',
+                'Privacidade total: seus dados nunca saem da máquina',
+                'Sem assinatura e sem cobrança por vídeo gerado',
+                'LLM como agente de direção criativa autônoma',
+                'Pipeline otimizado para GPUs de 8 GB de VRAM',
+            ],
         ],
         [
             'icon' => 'arrow-up-right',
-            'title' => 'Próximas etapas',
-            'items' => ['Suporte a múltiplos estilos visuais personalizados', 'Integração com modelos de vídeo generativo', 'Interface de edição de timeline', 'Exportação em múltiplos formatos e resoluções', 'Benchmark comparativo com plataformas comerciais'],
+            'title' => 'Roadmap',
+            'items' => [
+                'Suporte a múltiplos estilos visuais personalizados',
+                'Integração com modelos de vídeo generativo',
+                'Interface de edição de timeline',
+                'Exportação em múltiplos formatos e resoluções',
+                'Versão instalável para Windows com um clique',
+            ],
         ],
     ];
 ?>
@@ -30,10 +43,10 @@
 <div class="min-h-screen p-8 lg:p-12">
     <div class="max-w-3xl">
         <h1 class="font-display text-5xl font-bold tracking-tight text-foreground lg:text-6xl">NEW VideoMaker</h1>
-        <p class="mt-3 font-display text-lg text-muted-foreground">Plataforma de geração autônoma de vídeos com modelos de inteligência artificial locais.</p>
+        <p class="mt-3 font-display text-lg text-muted-foreground">Geração automatizada de vídeos com IA 100% local.</p>
         <div class="mt-6 h-px w-24 bg-foreground"></div>
         <p class="mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            Este projeto é desenvolvido como Trabalho de Conclusão de Curso (TCC) no curso de Engenharia de Software. A plataforma propõe uma abordagem inovadora para a criação de conteúdo audiovisual, onde todas as etapas — do roteiro ao vídeo final — são executadas por modelos de IA rodando localmente, garantindo privacidade, autonomia e custo zero.
+            Da ideia ao vídeo pronto em minutos. NEW VideoMaker usa uma cadeia de modelos de inteligência artificial rodando inteiramente na sua máquina para gerar roteiro, imagens, narração, música e legenda — tudo de forma autônoma, a partir de uma descrição em texto.
         </p>
     </div>
 
@@ -62,6 +75,11 @@
                 <?php endif; ?>
             </article>
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    </div>
+
+    <div class="mt-12 flex flex-wrap items-center gap-4">
+        <a href="<?php echo e(route('videos.create')); ?>" class="btn-primary">Criar vídeo agora</a>
+        <a href="<?php echo e(route('pipeline')); ?>" class="btn-outline">Ver pipeline técnico</a>
     </div>
 </div>
 <?php $__env->stopSection(); ?>

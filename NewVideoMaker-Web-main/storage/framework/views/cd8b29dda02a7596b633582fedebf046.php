@@ -68,7 +68,7 @@
                 </div>
                 <div class="flex items-center justify-between border-b border-border pb-3">
                     <span class="text-sm text-foreground">Pasta de saída</span>
-                    <input type="text" value="/output/videos" class="w-48 rounded-sm border border-border bg-background px-3 py-1.5 text-xs text-foreground outline-none focus:border-foreground">
+                    <input type="text" value="Padrão do sistema" class="w-48 rounded-sm border border-border bg-background px-3 py-1.5 text-xs text-foreground outline-none focus:border-foreground">
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-foreground">Usar legendas automaticamente</span>
@@ -99,9 +99,20 @@
             </div>
         </section>
 
-        <button class="btn-primary">Salvar configurações</button>
+        <button id="saveBtn" class="btn-primary">Salvar configurações</button>
+        <span id="saveMsg" class="hidden text-xs text-muted-foreground">Configurações salvas.</span>
     </div>
 </div>
 <?php $__env->stopSection(); ?>
+
+<?php $__env->startPush('scripts'); ?>
+<script>
+    document.getElementById('saveBtn').addEventListener('click', function () {
+        const msg = document.getElementById('saveMsg');
+        msg.classList.remove('hidden');
+        setTimeout(() => msg.classList.add('hidden'), 2500);
+    });
+</script>
+<?php $__env->stopPush(); ?>
 
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Administrador\Downloads\NewVideoMaker-Web-integrado-tailwind-blade\NewVideoMaker-Web-main\resources\views/pages/config.blade.php ENDPATH**/ ?>

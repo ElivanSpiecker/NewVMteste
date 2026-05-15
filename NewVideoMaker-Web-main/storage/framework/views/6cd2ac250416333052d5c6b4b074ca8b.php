@@ -1,8 +1,9 @@
 <?php
     $navItems = [
         ['label' => 'CRIAR', 'route' => 'videos.create', 'icon' => 'plus-square'],
-        ['label' => 'DASH', 'route' => 'dashboard', 'icon' => 'layout-dashboard'],
+        ['label' => 'PAINEL', 'route' => 'dashboard', 'icon' => 'layout-dashboard'],
         ['label' => 'VÍDEOS', 'route' => 'videos.index', 'icon' => 'video'],
+        ['label' => 'SHORTS', 'route' => 'shorts.index', 'icon' => 'youtube'],
         ['label' => 'PIPELINE', 'route' => 'pipeline', 'icon' => 'workflow'],
         ['label' => 'CONFIG', 'route' => 'config', 'icon' => 'settings'],
         ['label' => 'SOBRE', 'route' => 'sobre', 'icon' => 'info'],
@@ -18,7 +19,7 @@
         <?php $__currentLoopData = $navItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <a href="<?php echo e(route($item['route'])); ?>"
                title="<?php echo e($item['label']); ?>"
-               class="w-[76px] rounded-sm px-2 py-2 text-center font-display text-[10px] font-medium tracking-[0.15em] transition-all duration-200 <?php echo e(request()->routeIs($item['route']) || ($item['route'] === 'videos.index' && request()->routeIs('videos.show', 'videos.status')) ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground'); ?>">
+               class="w-[76px] rounded-sm px-2 py-2 text-center font-display text-[10px] font-medium tracking-[0.15em] transition-all duration-200 <?php echo e(request()->routeIs($item['route']) || ($item['route'] === 'videos.index' && request()->routeIs('videos.show', 'videos.status')) || ($item['route'] === 'shorts.index' && request()->routeIs('shorts.*')) ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground'); ?>">
                 <?php echo e($item['label']); ?>
 
             </a>

@@ -3,6 +3,7 @@
         ['label' => 'CRIAR', 'route' => 'videos.create', 'icon' => 'plus-square'],
         ['label' => 'PAINEL', 'route' => 'dashboard', 'icon' => 'layout-dashboard'],
         ['label' => 'VÍDEOS', 'route' => 'videos.index', 'icon' => 'video'],
+        ['label' => 'SHORTS', 'route' => 'shorts.index', 'icon' => 'youtube'],
         ['label' => 'PIPELINE', 'route' => 'pipeline', 'icon' => 'workflow'],
         ['label' => 'CONFIG', 'route' => 'config', 'icon' => 'settings'],
         ['label' => 'SOBRE', 'route' => 'sobre', 'icon' => 'info'],
@@ -18,7 +19,7 @@
         @foreach ($navItems as $item)
             <a href="{{ route($item['route']) }}"
                title="{{ $item['label'] }}"
-               class="w-[76px] rounded-sm px-2 py-2 text-center font-display text-[10px] font-medium tracking-[0.15em] transition-all duration-200 {{ request()->routeIs($item['route']) || ($item['route'] === 'videos.index' && request()->routeIs('videos.show', 'videos.status')) ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground' }}">
+               class="w-[76px] rounded-sm px-2 py-2 text-center font-display text-[10px] font-medium tracking-[0.15em] transition-all duration-200 {{ request()->routeIs($item['route']) || ($item['route'] === 'videos.index' && request()->routeIs('videos.show', 'videos.status')) || ($item['route'] === 'shorts.index' && request()->routeIs('shorts.*')) ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground' }}">
                 {{ $item['label'] }}
             </a>
         @endforeach

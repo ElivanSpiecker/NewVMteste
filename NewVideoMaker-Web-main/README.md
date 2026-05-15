@@ -30,8 +30,8 @@ Depois precisa de 3 terminais:
 # 1. Servidor web
 php artisan serve
 
-# 2. Worker da fila (1 vídeo por vez — VRAM é gargalo)
-php artisan queue:work --queue=video-generation --timeout=1200
+# 2. Worker da fila (vídeos + uploads do YouTube)
+php artisan queue:work --queue=video-generation,youtube,default --timeout=1500
 
 # 3. Vite (só em dev)
 npm run dev

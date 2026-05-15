@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'youtube' => [
+        // Credenciais OAuth obtidas no Google Cloud Console (APIs e serviços > Credenciais).
+        // O projeto Google deve ter a "YouTube Data API v3" habilitada.
+        'client_id'     => env('YOUTUBE_CLIENT_ID'),
+        'client_secret' => env('YOUTUBE_CLIENT_SECRET'),
+        'redirect'      => env('YOUTUBE_REDIRECT_URI', env('APP_URL').'/shorts/youtube/callback'),
+    ],
+
 ];
