@@ -1,12 +1,12 @@
 @php
     $navItems = [
-        ['label' => 'CRIAR', 'route' => 'videos.create', 'icon' => 'plus-square'],
-        ['label' => 'PAINEL', 'route' => 'dashboard', 'icon' => 'layout-dashboard'],
-        ['label' => 'VÍDEOS', 'route' => 'videos.index', 'icon' => 'video'],
-        ['label' => 'SHORTS', 'route' => 'shorts.index', 'icon' => 'youtube'],
-        ['label' => 'PIPELINE', 'route' => 'pipeline', 'icon' => 'workflow'],
-        ['label' => 'CONFIG', 'route' => 'config', 'icon' => 'settings'],
-        ['label' => 'SOBRE', 'route' => 'sobre', 'icon' => 'info'],
+        ['label' => __('CRIAR'), 'route' => 'videos.create', 'icon' => 'plus-square'],
+        ['label' => __('PAINEL'), 'route' => 'dashboard', 'icon' => 'layout-dashboard'],
+        ['label' => __('VÍDEOS'), 'route' => 'videos.index', 'icon' => 'video'],
+        ['label' => __('SHORTS'), 'route' => 'shorts.index', 'icon' => 'youtube'],
+        ['label' => __('PIPELINE'), 'route' => 'pipeline', 'icon' => 'workflow'],
+        ['label' => __('CONFIG'), 'route' => 'config', 'icon' => 'settings'],
+        ['label' => __('SOBRE'), 'route' => 'sobre', 'icon' => 'info'],
     ];
 @endphp
 
@@ -26,7 +26,7 @@
     </nav>
 
     <div class="flex flex-col items-center gap-4 pt-6">
-        <a href="{{ route('health.index') }}" class="text-muted-foreground transition-colors hover:text-foreground" aria-label="Serviços">
+        <a href="{{ route('health.index') }}" class="text-muted-foreground transition-colors hover:text-foreground" aria-label="{{ __('Serviços') }}">
             <i data-lucide="activity" class="h-4 w-4"></i>
         </a>
         <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="text-muted-foreground transition-colors hover:text-foreground" aria-label="GitHub">

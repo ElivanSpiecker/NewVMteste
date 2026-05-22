@@ -9,6 +9,8 @@ class Video extends Model
     protected $fillable = [
         'tema',
         'duracao',
+        'idioma',
+        'voz',
         'imagens_modo',
         'narracao_modo',
         'musica_modo',
@@ -44,15 +46,15 @@ class Video extends Model
     public function statusLabel(): string
     {
         return match ($this->status) {
-            'pending'               => 'Na fila',
-            'generating_script'     => 'Gerando roteiro...',
-            'generating_images'     => 'Gerando imagens...',
-            'generating_narration'  => 'Gerando narração...',
-            'generating_music'      => 'Gerando música...',
-            'generating_subtitles'  => 'Gerando legendas...',
-            'assembling'            => 'Montando vídeo...',
-            'done'                  => 'Concluído',
-            'failed'                => 'Falhou',
+            'pending'               => __('Na fila'),
+            'generating_script'     => __('Gerando roteiro...'),
+            'generating_images'     => __('Gerando imagens...'),
+            'generating_narration'  => __('Gerando narração...'),
+            'generating_music'      => __('Gerando música...'),
+            'generating_subtitles'  => __('Gerando legendas...'),
+            'assembling'            => __('Montando vídeo...'),
+            'done'                  => __('Concluído'),
+            'failed'                => __('Falhou'),
             default                 => $this->status,
         };
     }

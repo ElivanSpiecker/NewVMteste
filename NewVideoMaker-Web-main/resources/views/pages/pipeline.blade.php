@@ -1,32 +1,32 @@
 @extends('layouts.app')
 
 @section('title', 'Pipeline — NEW VideoMaker')
-@section('description', 'Fluxo técnico de geração de vídeos com IA local.')
+@section('description', __('Fluxo completo de geração automatizada de vídeos.'))
 
 @section('content')
 @php
     $steps = [
-        ['icon' => 'message-square', 'title' => 'Descrição textual', 'tech' => 'Usuário', 'desc' => 'O usuário envia uma descrição do vídeo desejado.'],
-        ['icon' => 'file-text', 'title' => 'Roteiro e direção criativa', 'tech' => 'Gemma via Ollama', 'desc' => 'LLM local gera roteiro, prompts de imagem e direção artística.'],
-        ['icon' => 'image', 'title' => 'Geração de imagens', 'tech' => 'FLUX.1 Schnell', 'desc' => 'Modelo de difusão gera imagens de alta qualidade para cada cena.'],
-        ['icon' => 'mic', 'title' => 'Narração em áudio', 'tech' => 'Kokoro TTS', 'desc' => 'Sintetizador de voz gera narração natural a partir do roteiro.'],
-        ['icon' => 'music', 'title' => 'Trilha sonora', 'tech' => 'ACE-Step 1.5', 'desc' => 'Modelo generativo cria música original para o vídeo.'],
-        ['icon' => 'subtitles', 'title' => 'Legendas sincronizadas', 'tech' => 'Whisper', 'desc' => 'Modelo de transcrição gera legendas automaticamente.'],
-        ['icon' => 'film', 'title' => 'Montagem final', 'tech' => 'FFmpeg / MoviePy', 'desc' => 'Composição de vídeo, áudio, música e legendas.'],
-        ['icon' => 'server', 'title' => 'Orquestração', 'tech' => 'Laravel', 'desc' => 'A plataforma coordena e sequencia todas as etapas do pipeline automaticamente.'],
+        ['icon' => 'message-square', 'title' => __('Descrição textual'), 'tech' => __('Usuário'), 'desc' => __('O usuário envia uma descrição do vídeo desejado.')],
+        ['icon' => 'file-text', 'title' => __('Roteiro e direção criativa'), 'tech' => __('Gemma via Ollama'), 'desc' => __('LLM local gera roteiro, prompts de imagem e direção artística.')],
+        ['icon' => 'image', 'title' => __('Geração de imagens'), 'tech' => 'FLUX.1 Schnell', 'desc' => __('Modelo de difusão gera imagens de alta qualidade para cada cena.')],
+        ['icon' => 'mic', 'title' => __('Narração em áudio'), 'tech' => __('Kokoro TTS'), 'desc' => __('Sintetizador de voz gera narração natural a partir do roteiro.')],
+        ['icon' => 'music', 'title' => __('Trilha sonora'), 'tech' => 'ACE-Step 1.5', 'desc' => __('Modelo generativo cria música original para o vídeo.')],
+        ['icon' => 'subtitles', 'title' => __('Legendas sincronizadas'), 'tech' => __('Whisper'), 'desc' => __('Modelo de transcrição gera legendas automaticamente.')],
+        ['icon' => 'film', 'title' => __('Montagem final'), 'tech' => 'FFmpeg / MoviePy', 'desc' => __('Composição de vídeo, áudio, música e legendas.')],
+        ['icon' => 'server', 'title' => __('Orquestração'), 'tech' => __('Laravel'), 'desc' => __('A plataforma coordena e sequencia todas as etapas do pipeline automaticamente.')],
     ];
     $features = [
-        ['icon' => 'cpu', 'title' => 'Execução local', 'desc' => 'Todos os modelos rodam na sua máquina.'],
-        ['icon' => 'shield', 'title' => 'Privacidade total', 'desc' => 'Nenhum dado sai do ambiente local.'],
-        ['icon' => 'dollar-sign', 'title' => 'Custo zero', 'desc' => 'Sem APIs pagas, sem cobranças por geração.'],
-        ['icon' => 'server', 'title' => 'Processamento sequencial', 'desc' => 'Otimizado para VRAM limitada.'],
+        ['icon' => 'cpu', 'title' => __('Execução local'), 'desc' => __('Todos os modelos rodam na sua máquina.')],
+        ['icon' => 'shield', 'title' => __('Privacidade total'), 'desc' => __('Nenhum dado sai do ambiente local.')],
+        ['icon' => 'dollar-sign', 'title' => __('Custo zero'), 'desc' => __('Sem APIs pagas, sem cobranças por geração.')],
+        ['icon' => 'server', 'title' => __('Processamento sequencial'), 'desc' => __('Otimizado para VRAM limitada.')],
     ];
 @endphp
 
 <div class="min-h-screen p-8 lg:p-12">
     <div>
         <h1 class="font-display text-4xl font-bold tracking-tight text-foreground lg:text-5xl">Pipeline</h1>
-        <p class="mt-2 text-sm text-muted-foreground">Fluxo completo de geração automatizada de vídeos.</p>
+        <p class="mt-2 text-sm text-muted-foreground">{{ __('Fluxo completo de geração automatizada de vídeos.') }}</p>
     </div>
 
     <div class="mt-10 grid gap-10 lg:grid-cols-[1fr_320px]">
@@ -51,7 +51,7 @@
         </div>
 
         <aside class="space-y-4">
-            <h2 class="section-title">Diferenciais</h2>
+            <h2 class="section-title">{{ __('Diferenciais') }}</h2>
             @foreach ($features as $feature)
                 <div class="rounded-sm border border-border bg-card p-4">
                     <div class="flex items-center gap-2">

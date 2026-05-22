@@ -24,4 +24,20 @@ return [
         'VIDEOGEN_OUTPUT_DIR',
         'C:\\Users\\nicol\\PycharmProjects\\NewVideoMaker\\output'
     ),
+
+    /*
+     * Python do venv do Kokoro (onde edge_tts está instalado — usado para preview de vozes).
+     */
+    'python_kokoro' => env(
+        'VIDEOGEN_PYTHON_KOKORO',
+        'C:\\Users\\nicol\\PycharmProjects\\Kokoro\\venv\\Scripts\\python.exe'
+    ),
+
+    /*
+     * Pasta dos scripts Python do pipeline (gerar_narracao.py, gerar_amostra_voz.py, etc.).
+     */
+    'scripts_dir' => env(
+        'VIDEOGEN_SCRIPTS_DIR',
+        'C:\\Users\\nicol\\PycharmProjects\\NewVideoMaker\\scripts'
+    ),
 ];

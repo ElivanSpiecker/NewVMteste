@@ -49,6 +49,8 @@ class GerarVideo implements ShouldQueue
             '--duracao',        (string) $video->duracao,
             '--video-id',       (string) $video->id,
             '--output-dir',     $outputDir,
+            '--idioma',         $video->idioma ?? 'PT-BR',
+            '--voz',            $video->voz ?? '',
             '--imagens-modo',   $video->imagens_modo,
             '--narracao-modo',  $video->narracao_modo,
             '--musica-modo',    $video->musica_modo,

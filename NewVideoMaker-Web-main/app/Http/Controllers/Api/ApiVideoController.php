@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\VoiceController;
 use App\Jobs\GerarVideo;
 use App\Models\Video;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ApiVideoController extends Controller
@@ -23,6 +25,8 @@ class ApiVideoController extends Controller
         $data = $request->validate([
             'tema'           => ['required', 'string', 'max:200'],
             'duracao'        => ['required', 'integer', 'min:15', 'max:120'],
+            'idioma'         => ['nullable', 'in:PT-BR,EN-US'],
+            'voz'            => ['nullable', Rule::in(VoiceController::allVoiceIds())],
             'imagens_modo'   => ['nullable', 'in:gerar,upload'],
             'narracao_modo'  => ['nullable', 'in:gerar,upload,nenhum'],
             'musica_modo'    => ['nullable', 'in:gerar,upload,nenhum'],
@@ -37,6 +41,8 @@ class ApiVideoController extends Controller
         $video = Video::create([
             'tema'           => $data['tema'],
             'duracao'        => $data['duracao'],
+            'idioma'         => $data['idioma'] ?? 'PT-BR',
+            'voz'            => $data['voz'] ?? null,
             'imagens_modo'   => $data['imagens_modo']  ?? 'gerar',
             'narracao_modo'  => $data['narracao_modo'] ?? 'gerar',
             'musica_modo'    => $data['musica_modo']   ?? 'gerar',
@@ -131,6 +137,8 @@ class ApiVideoController extends Controller
             'id'           => $video->id,
             'tema'         => $video->tema,
             'duracao'      => $video->duracao,
+            'idioma'       => $video->idioma ?? 'PT-BR',
+            'voz'          => $video->voz,
             'status'       => $video->status,
             'status_label' => $video->statusLabel(),
             'progresso'    => $video->progresso,

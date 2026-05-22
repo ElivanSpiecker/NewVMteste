@@ -6,6 +6,15 @@ use App\Http\Controllers\YoutubeAuthController;
 use App\Http\Controllers\YoutubeShortsController;
 use Illuminate\Support\Facades\Route;
 
+// Troca de idioma da interface (salva na sessão)
+Route::post('/locale', function (\Illuminate\Http\Request $request) {
+    $locale = $request->input('locale');
+    if (in_array($locale, ['pt-BR', 'en'])) {
+        session(['locale' => $locale]);
+    }
+    return back();
+})->name('locale.switch');
+
 Route::get('/', [VideoController::class, 'index'])->name('videos.index');
 Route::get('/novo', [VideoController::class, 'create'])->name('videos.create');
 Route::post('/videos', [VideoController::class, 'store'])->name('videos.store');

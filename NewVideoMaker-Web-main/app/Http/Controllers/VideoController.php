@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\VoiceController;
 use App\Jobs\GerarVideo;
 use App\Models\Video;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class VideoController extends Controller
@@ -44,6 +46,8 @@ class VideoController extends Controller
         $data = $request->validate([
             'tema'           => ['required', 'string', 'max:200'],
             'duracao'        => ['required', 'integer', 'min:15', 'max:120'],
+            'idioma'         => ['required', 'in:PT-BR,EN-US'],
+            'voz'            => ['nullable', Rule::in(VoiceController::allVoiceIds())],
             'imagens_modo'   => ['required', 'in:gerar,upload'],
             'narracao_modo'  => ['required', 'in:gerar,upload,nenhum'],
             'musica_modo'    => ['required', 'in:gerar,upload,nenhum'],
@@ -58,6 +62,8 @@ class VideoController extends Controller
         $video = Video::create([
             'tema'           => $data['tema'],
             'duracao'        => $data['duracao'],
+            'idioma'         => $data['idioma'],
+            'voz'            => $data['voz'] ?? null,
             'imagens_modo'   => $data['imagens_modo'],
             'narracao_modo'  => $data['narracao_modo'],
             'musica_modo'    => $data['musica_modo'],
