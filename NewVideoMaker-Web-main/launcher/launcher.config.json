@@ -1,0 +1,53 @@
+{
+    "_comment": "Configuracao do launcher do NEW VideoMaker. Caminhos podem ser relativos a raiz do projeto (..) ou absolutos.",
+    "app": {
+        "name": "NEW VideoMaker",
+        "host": "127.0.0.1",
+        "port": 8000,
+        "open_browser": true,
+        "ready_timeout_seconds": 30
+    },
+    "php": {
+        "executable": "php",
+        "project_dir": "..",
+        "queue_args": [
+            "artisan",
+            "queue:work",
+            "--queue=video-generation,youtube,default",
+            "--timeout=1500",
+            "--tries=1"
+        ]
+    },
+    "services": [
+        {
+            "name": "ollama",
+            "label": "Ollama",
+            "enabled": true,
+            "executable": "ollama",
+            "args": ["serve"],
+            "workdir": "",
+            "wait_port": 11434,
+            "ready_timeout_seconds": 20
+        },
+        {
+            "name": "comfyui",
+            "label": "ComfyUI",
+            "enabled": false,
+            "executable": "C:/PycharmProjects/ComfyUI/.venv/Scripts/python.exe",
+            "args": ["main.py", "--lowvram"],
+            "workdir": "C:/PycharmProjects/ComfyUI",
+            "wait_port": 8188,
+            "ready_timeout_seconds": 60
+        },
+        {
+            "name": "acestep",
+            "label": "ACE-Step",
+            "enabled": false,
+            "executable": "C:/PycharmProjects/ACE-Step/.venv/Scripts/python.exe",
+            "args": ["app.py"],
+            "workdir": "C:/PycharmProjects/ACE-Step",
+            "wait_port": 7860,
+            "ready_timeout_seconds": 60
+        }
+    ]
+}

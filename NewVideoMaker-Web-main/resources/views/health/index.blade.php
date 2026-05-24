@@ -28,9 +28,33 @@
                 <p class="service-label mt-6 font-display text-sm font-semibold {{ $service['up'] ? 'text-foreground' : 'text-destructive' }}">
                     {{ $service['up'] ? __('Online') : __('Offline') }}
                 </p>
+                <p class="service-detail mt-2 text-[11px] text-muted-foreground">{{ $service['detail'] ?? '' }}</p>
+                @if (!$service['up'] && !empty($service['install']))
+                    <a href="{{ $service['install'] }}" target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-1 text-[11px] text-muted-foreground underline hover:text-foreground">
+                        Como instalar ↗
+                    </a>
+                @endif
             </article>
         @endforeach
     </div>
+
+    @isset($pipeline)
+        <section class="card mt-8">
+            <h2 class="section-title">Pipeline Python</h2>
+            <p class="mt-1 text-xs text-muted-foreground">Caminhos configurados em <a href="{{ route('config') }}" class="underline">CONFIG → Pipeline</a>.</p>
+            <div class="mt-4 space-y-2 text-xs">
+                @foreach (['python' => 'Python', 'pipeline' => 'pipeline.py', 'output_dir' => 'Pasta de saída'] as $k => $label)
+                    @php $info = $pipeline[$k]; @endphp
+                    <div class="flex items-center gap-3">
+                        <span class="h-2 w-2 rounded-full {{ $info['ok'] ? 'bg-chart-2' : 'bg-destructive' }}"></span>
+                        <span class="w-32 text-foreground">{{ $label }}:</span>
+                        <span class="flex-1 break-all text-muted-foreground">{{ $info['path'] ?: '—' }}</span>
+                        @if (!$info['ok'])<span class="text-destructive">{{ $info['reason'] }}</span>@endif
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endisset
 
     <section class="card mt-8">
         <h2 class="section-title">{{ __('Inicialização dos serviços') }}</h2>
@@ -72,9 +96,11 @@
                 if (!card) return;
                 const dot = card.querySelector('.service-dot');
                 const label = card.querySelector('.service-label');
+                const detail = card.querySelector('.service-detail');
                 dot.className = `service-dot h-3 w-3 rounded-full ${service.up ? 'bg-primary' : 'bg-destructive animate-pulse'}`;
                 label.textContent = service.up ? T_ONLINE : T_OFF;
                 label.className = `service-label mt-6 font-display text-sm font-semibold ${service.up ? 'text-foreground' : 'text-destructive'}`;
+                if (detail) detail.textContent = service.detail || '';
             });
         } catch (error) {
             console.error(error);

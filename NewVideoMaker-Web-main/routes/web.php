@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SetupController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\YoutubeAuthController;
 use App\Http\Controllers\YoutubeShortsController;
@@ -26,8 +28,22 @@ Route::get('/videos/{video}/legenda', [VideoController::class, 'downloadSrt'])->
 
 Route::get('/dashboard', [VideoController::class, 'dashboard'])->name('dashboard');
 Route::view('/pipeline', 'pages.pipeline')->name('pipeline');
-Route::view('/config', 'pages.config')->name('config');
 Route::view('/sobre', 'pages.sobre')->name('sobre');
+
+Route::get('/config', [SettingsController::class, 'index'])->name('config');
+Route::post('/config/youtube',  [SettingsController::class, 'saveYoutube'])->name('config.youtube');
+Route::post('/config/pipeline', [SettingsController::class, 'savePipeline'])->name('config.pipeline');
+
+// Wizard de primeira execucao
+Route::prefix('setup')->name('setup.')->group(function () {
+    Route::get('/',                 [SetupController::class, 'index'])->name('index');
+    Route::get('/status',           [SetupController::class, 'status'])->name('status');
+    Route::post('/install/ollama',  [SetupController::class, 'installOllama'])->name('install-ollama');
+    Route::post('/pull-model',      [SetupController::class, 'pullModel'])->name('pull-model');
+    Route::post('/save-path',       [SetupController::class, 'savePath'])->name('save-path');
+    Route::post('/complete',        [SetupController::class, 'complete'])->name('complete');
+    Route::post('/skip',            [SetupController::class, 'skip'])->name('skip');
+});
 
 Route::get('/health', [HealthController::class, 'index'])->name('health.index');
 Route::get('/health/api', [HealthController::class, 'api'])->name('health.api');

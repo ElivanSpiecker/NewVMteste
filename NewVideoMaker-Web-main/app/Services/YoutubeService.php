@@ -32,29 +32,34 @@ class YoutubeService
         'https://www.googleapis.com/auth/youtube.readonly',
     ];
 
+    public function __construct(private readonly AppConfig $appConfig)
+    {
+    }
+
     public function clientId(): string
     {
-        $id = (string) config('services.youtube.client_id');
+        $id = (string) $this->appConfig->get('youtube.client_id', '');
         if ($id === '') {
-            throw new RuntimeException('YOUTUBE_CLIENT_ID não configurado em .env / config/services.php.');
+            throw new RuntimeException('Credenciais do YouTube não configuradas. Vá em CONFIG → YouTube e cole o Client ID.');
         }
         return $id;
     }
 
     public function clientSecret(): string
     {
-        $secret = (string) config('services.youtube.client_secret');
+        $secret = (string) $this->appConfig->get('youtube.client_secret', '');
         if ($secret === '') {
-            throw new RuntimeException('YOUTUBE_CLIENT_SECRET não configurado em .env / config/services.php.');
+            throw new RuntimeException('Credenciais do YouTube não configuradas. Vá em CONFIG → YouTube e cole o Client Secret.');
         }
         return $secret;
     }
 
     public function redirectUri(): string
     {
-        $uri = (string) config('services.youtube.redirect');
+        $uri = (string) $this->appConfig->get('youtube.redirect_uri', '');
         if ($uri === '') {
-            throw new RuntimeException('YOUTUBE_REDIRECT_URI não configurado em .env / config/services.php.');
+            // fallback: monta a partir da URL atual da app
+            $uri = rtrim((string) config('app.url') ?: 'http://localhost:8000', '/').'/shorts/youtube/callback';
         }
         return $uri;
     }
