@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(PRJ=\"/c/Users/Administrador/Downloads/NewVideoMaker-Web-integrado-tailwind-blade/NewVideoMaker-Web-main\" *)"
+    ]
+  }
+}
