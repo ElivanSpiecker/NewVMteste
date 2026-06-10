@@ -1,0 +1,13 @@
+# Artefatos gerados pelo build do instalador — nunca commitar.
+cache/
+staging/
+dist/
+*.zip
+*.exe
+
+# Componentes pré-montados (grandes demais p/ versionar) — mantém só a estrutura + READMEs.
+payload/*
+!payload/README.md
+!payload/*/
+payload/*/*
+!payload/*/.gitkeep

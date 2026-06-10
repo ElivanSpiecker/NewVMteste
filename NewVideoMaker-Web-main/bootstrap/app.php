@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
         ]);
+
+        // Wizard /setup intercepta a primeira execucao (cliente ainda nao configurou tudo).
+        $middleware->appendToGroup('web', \App\Http\Middleware\RedirectSeSetupIncompleto::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

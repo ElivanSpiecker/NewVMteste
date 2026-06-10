@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Video;
+use App\Services\AppConfig;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -20,13 +21,22 @@ class GerarVideo implements ShouldQueue
 
     public function __construct(public readonly int $videoId) {}
 
-    public function handle(): void
+    public function handle(AppConfig $appConfig): void
     {
         $video = Video::findOrFail($this->videoId);
 
-        $pythonPath = config('videogen.python_path');
-        $pipelinePath = config('videogen.pipeline_path');
-        $outputDir = config('videogen.output_dir');
+        $pythonPath   = $appConfig->get('videogen.python_path');
+        $pipelinePath = $appConfig->get('videogen.pipeline_path');
+        $outputDir    = $appConfig->get('videogen.output_dir');
+
+        if (empty($pythonPath) || empty($pipelinePath) || empty($outputDir)) {
+            $video->update([
+                'status'    => 'failed',
+                'erro'      => 'Pipeline não configurado. Vá em CONFIG → Pipeline e informe Python, pipeline.py e pasta de saída.',
+                'progresso' => 0,
+            ]);
+            return;
+        }
 
         $steps = [
             'generating_script'    => 17,
