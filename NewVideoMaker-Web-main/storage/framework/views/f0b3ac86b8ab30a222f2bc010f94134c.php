@@ -15,6 +15,19 @@
         </a>
     </div>
 
+    <?php if(session('success')): ?>
+        <div class="mt-6 rounded-sm border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-foreground">
+            <?php echo e(session('success')); ?>
+
+        </div>
+    <?php endif; ?>
+    <?php if(session('error')): ?>
+        <div class="mt-6 rounded-sm border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <?php echo e(session('error')); ?>
+
+        </div>
+    <?php endif; ?>
+
     <div class="mt-8 flex flex-wrap items-center gap-3">
         <?php $__currentLoopData = [__('Todos'), __('Concluídos'), __('Em processamento'), __('Com erro')]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $filter): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <button type="button" data-filter="<?php echo e($filter); ?>" class="video-filter rounded-sm px-3 py-1.5 font-display text-[10px] font-medium tracking-wider uppercase transition-colors <?php echo e($index === 0 ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground'); ?>">
@@ -43,11 +56,16 @@
                     'processing' => __('Em processamento'),
                     default => __('Com erro'),
                 };
-                $thumb = asset('assets/frame-' . (($loop->iteration - 1) % 6 + 1) . '.jpg');
+                $thumbCandidate = $video->thumbnail_path
+                    ?: (($video->imagens_paths[0] ?? null));
+                $hasRealThumb = $thumbCandidate && file_exists($thumbCandidate);
+                $thumb = $hasRealThumb
+                    ? route('videos.thumbnail', $video)
+                    : asset('assets/frame-' . (($loop->iteration - 1) % 6 + 1) . '.jpg');
             ?>
             <article data-title="<?php echo e(strtolower($video->tema)); ?>" data-status="<?php echo e($filterKey); ?>" class="video-card group overflow-hidden rounded-sm border border-border bg-card transition-transform duration-300 hover:-translate-y-1">
                 <div class="relative aspect-[4/3] overflow-hidden bg-accent">
-                    <img src="<?php echo e($thumb); ?>" alt="<?php echo e($video->tema); ?>" class="h-full w-full object-cover grayscale transition-all duration-300 group-hover:scale-105 group-hover:grayscale-0">
+                    <img src="<?php echo e($thumb); ?>" alt="<?php echo e($video->tema); ?>" loading="lazy" class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 <?php echo e($hasRealThumb ? '' : 'grayscale group-hover:grayscale-0'); ?>">
                     <div class="absolute right-2 top-2 rounded-sm px-2 py-0.5 font-display text-[10px] tracking-wider uppercase <?php echo e($statusClass); ?>">
                         <?php echo e($video->statusLabel()); ?>
 
@@ -65,11 +83,20 @@
                         <span>•</span>
                         <span><?php echo e($video->idioma ?? 'PT-BR'); ?></span>
                     </div>
-                    <div class="mt-3 flex flex-wrap gap-2">
+                    <div class="mt-3 flex flex-wrap items-center gap-2">
                         <a href="<?php echo e($video->isDone() ? route('videos.show', $video) : route('videos.status', $video)); ?>" class="flex items-center gap-1 rounded-sm border border-border px-2.5 py-1.5 text-[10px] font-medium text-foreground transition-colors hover:bg-accent"><i data-lucide="eye" class="h-3 w-3"></i> <?php echo e(__('Ver')); ?></a>
                         <?php if($video->isDone()): ?>
                             <a href="<?php echo e(route('videos.download', $video)); ?>" class="flex items-center gap-1 rounded-sm border border-border px-2.5 py-1.5 text-[10px] font-medium text-foreground transition-colors hover:bg-accent"><i data-lucide="download" class="h-3 w-3"></i> <?php echo e(__('Baixar')); ?></a>
                             <a href="<?php echo e(route('videos.download-srt', $video)); ?>" class="flex items-center gap-1 rounded-sm border border-border px-2.5 py-1.5 text-[10px] font-medium text-foreground transition-colors hover:bg-accent"><i data-lucide="file-text" class="h-3 w-3"></i> SRT</a>
+                        <?php endif; ?>
+                        <?php if (! ($video->isProcessing())): ?>
+                            <form action="<?php echo e(route('videos.destroy', $video)); ?>" method="POST" class="ml-auto js-delete-video" data-tema="<?php echo e($video->tema); ?>">
+                                <?php echo csrf_field(); ?>
+                                <?php echo method_field('DELETE'); ?>
+                                <button type="submit" title="<?php echo e(__('Excluir vídeo')); ?>" class="flex items-center gap-1 rounded-sm border border-border px-2.5 py-1.5 text-[10px] font-medium text-muted-foreground transition-colors hover:border-destructive hover:bg-destructive hover:text-destructive-foreground">
+                                    <i data-lucide="trash-2" class="h-3 w-3"></i>
+                                </button>
+                            </form>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -114,6 +141,18 @@
     });
 
     searchInput?.addEventListener('input', applyFilters);
+
+    // Confirmação de exclusão
+    const CONFIRM_DELETE = <?php echo json_encode(__('Excluir o vídeo ":tema"? Esta ação não pode ser desfeita.'), 15, 512) ?>;
+    document.querySelectorAll('form.js-delete-video').forEach((form) => {
+        form.addEventListener('submit', (e) => {
+            const tema = form.dataset.tema || '';
+            const msg = CONFIRM_DELETE.replace(':tema', tema);
+            if (!confirm(msg)) {
+                e.preventDefault();
+            }
+        });
+    });
 </script>
 <?php $__env->stopPush(); ?>
 

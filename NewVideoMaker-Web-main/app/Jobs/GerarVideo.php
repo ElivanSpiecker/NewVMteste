@@ -84,22 +84,41 @@ class GerarVideo implements ShouldQueue
 
         $process = new Process(
             command: $command,
-            env: [
-                'PYTHONIOENCODING' => 'utf-8', // sem isso, emojis quebram em cp1252
+            // Herda o ambiente completo (SystemRoot/PATH são essenciais no Windows —
+            // sem SystemRoot o Python falha em _Py_HashRandomization_Init) e só
+            // sobrescreve o encoding (sem isso, emojis quebram em cp1252).
+            env: array_merge(getenv(), [
+                'PYTHONIOENCODING' => 'utf-8',
                 'PYTHONUTF8'       => '1',
-            ],
+            ]),
         );
 
         $process->setTimeout(1200);
 
         $currentStep = 'generating_script';
+        $artifacts = ['narracao' => null, 'musica' => null, 'imagens' => []];
 
-        $process->run(function (string $type, string $buffer) use ($video, $steps, &$currentStep): void {
+        $process->run(function (string $type, string $buffer) use ($video, $steps, &$currentStep, &$artifacts): void {
             foreach ($steps as $step => $progresso) {
                 if (str_contains($buffer, "STEP:{$step}")) {
                     $currentStep = $step;
                     $video->update(['status' => $step, 'progresso' => $progresso]);
                     break;
+                }
+            }
+
+            // Parse ARTIFACT: markers
+            if (preg_match_all('/ARTIFACT:([a-z]+)(?::(\d+))?=(.+)/', $buffer, $matches, PREG_SET_ORDER)) {
+                foreach ($matches as $m) {
+                    $kind = $m[1];
+                    $idx  = $m[2] !== '' ? (int) $m[2] : null;
+                    $path = trim($m[3]);
+
+                    if ($kind === 'imagem' && $idx !== null) {
+                        $artifacts['imagens'][$idx] = $path;
+                    } elseif (in_array($kind, ['narracao', 'musica'], true)) {
+                        $artifacts[$kind] = $path;
+                    }
                 }
             }
         });
@@ -116,12 +135,73 @@ class GerarVideo implements ShouldQueue
         $videoFile = "{$outputDir}\\video\\final_{$video->id}.mp4";
         $srtFile   = "{$outputDir}\\audio\\legenda.srt";
 
+        // Copia artefatos para diretório persistente por vídeo
+        $persisted = $this->persistArtifacts($video->id, $artifacts);
+
+        // Thumbnail = primeira imagem persistida (cena01).
+        // Fallback: cena01 no diretório de upload (caso o pipeline não emita ARTIFACT:imagem).
+        $thumbnail = $persisted['imagens'][0] ?? null;
+        if (!$thumbnail) {
+            $uploadCena1 = glob("{$uploadDir}/imagens/cena01.*") ?: [];
+            $thumbnail = $uploadCena1[0] ?? null;
+        }
+
         $video->update([
-            'status'     => 'done',
-            'progresso'  => 100,
-            'video_path' => file_exists($videoFile) ? $videoFile : null,
-            'srt_path'   => file_exists($srtFile)   ? $srtFile   : null,
+            'status'         => 'done',
+            'progresso'      => 100,
+            'video_path'     => file_exists($videoFile) ? $videoFile : null,
+            'srt_path'       => file_exists($srtFile)   ? $srtFile   : null,
+            'narracao_path'  => $persisted['narracao'],
+            'musica_path'    => $persisted['musica'],
+            'imagens_paths'  => $persisted['imagens'] ?: null,
+            'thumbnail_path' => $thumbnail && file_exists($thumbnail) ? $thumbnail : null,
         ]);
+    }
+
+    /**
+     * Copia narração/música/imagens do diretório de output (que será sobrescrito
+     * pelo próximo vídeo) para storage/app/artifacts/{id}/, devolvendo paths absolutos.
+     */
+    private function persistArtifacts(int $videoId, array $artifacts): array
+    {
+        $base = storage_path("app/artifacts/{$videoId}");
+        if (!is_dir($base)) {
+            mkdir($base, 0755, true);
+        }
+
+        $out = ['narracao' => null, 'musica' => null, 'imagens' => []];
+
+        if ($artifacts['narracao'] && file_exists($artifacts['narracao'])) {
+            $dest = "{$base}\\narracao.wav";
+            @copy($artifacts['narracao'], $dest);
+            $out['narracao'] = $dest;
+        }
+
+        if ($artifacts['musica'] && file_exists($artifacts['musica'])) {
+            $ext = strtolower(pathinfo($artifacts['musica'], PATHINFO_EXTENSION) ?: 'mp3');
+            $dest = "{$base}\\musica.{$ext}";
+            @copy($artifacts['musica'], $dest);
+            $out['musica'] = $dest;
+        }
+
+        if (!empty($artifacts['imagens'])) {
+            $destDir = "{$base}\\imagens";
+            if (!is_dir($destDir)) {
+                mkdir($destDir, 0755, true);
+            }
+            ksort($artifacts['imagens']);
+            foreach ($artifacts['imagens'] as $idx => $src) {
+                if (!file_exists($src)) {
+                    continue;
+                }
+                $ext = strtolower(pathinfo($src, PATHINFO_EXTENSION) ?: 'png');
+                $dest = sprintf('%s\\cena%02d.%s', $destDir, $idx, $ext);
+                @copy($src, $dest);
+                $out['imagens'][] = $dest;
+            }
+        }
+
+        return $out;
     }
 
     public function failed(Throwable $exception): void

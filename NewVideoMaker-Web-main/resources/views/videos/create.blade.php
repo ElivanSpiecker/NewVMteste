@@ -16,7 +16,11 @@
 
             <div>
                 <label class="form-label" for="tema">{{ __('Tema do vídeo') }}</label>
-                <input id="tema" type="text" name="tema" value="{{ old('tema') }}" maxlength="200" required placeholder="{{ __('ex: café artesanal, energia solar, música independente...') }}" class="form-control">
+                <textarea id="tema" name="tema" maxlength="2000" rows="4" required placeholder="{{ __('ex: café artesanal, energia solar, música independente...') }}" class="form-control resize-y">{{ old('tema') }}</textarea>
+                <div class="mt-1 flex justify-between text-[11px] text-muted-foreground">
+                    <span>{{ __('Descreva o tema com o nível de detalhe que quiser.') }}</span>
+                    <span id="temaCount">0 / 2000</span>
+                </div>
                 @error('tema')
                     <p class="mt-1 text-xs text-destructive">{{ $message }}</p>
                 @enderror
@@ -117,9 +121,25 @@
                 </div>
 
                 <div id="imagens_upload_wrap" class="mt-4 hidden">
-                    <label class="form-label" for="imagens">{{ __('Arquivos de imagem (uma por cena, em ordem)') }}</label>
-                    <input id="imagens" type="file" name="imagens[]" accept="image/*" multiple class="form-control">
-                    <p class="mt-1 text-xs text-muted-foreground">{{ __('JPG, PNG ou WebP. Até 20 imagens, 10 MB cada.') }}</p>
+                    <label class="form-label">{{ __('Imagens das cenas') }}</label>
+                    <p class="mb-2 text-xs text-muted-foreground">{{ __('JPG, PNG ou WebP. Até 20 imagens, 10 MB cada. Arraste para reordenar.') }}</p>
+
+                    <input id="imagens" type="file" name="imagens[]" accept="image/jpeg,image/png,image/webp,image/bmp" multiple class="hidden">
+
+                    {{-- Drop zone (visível quando não há imagens) --}}
+                    <div id="imagensDropZone" class="flex cursor-pointer flex-col items-center justify-center rounded-sm border-2 border-dashed border-border p-8 transition-colors hover:border-foreground/40">
+                        <i data-lucide="image-plus" class="h-8 w-8 text-muted-foreground"></i>
+                        <p class="mt-2 text-sm text-muted-foreground">{{ __('Clique ou arraste imagens aqui') }}</p>
+                    </div>
+
+                    {{-- Grid de previews reordenável --}}
+                    <div id="imagensGrid" class="flex flex-wrap gap-2"></div>
+
+                    {{-- Botão para adicionar mais (visível quando já há imagens) --}}
+                    <button type="button" id="imagensAddMore" class="mt-3 hidden w-full rounded-sm border-2 border-dashed border-border py-3 text-xs text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground">
+                        + {{ __('Adicionar mais imagens') }}
+                    </button>
+
                     @error('imagens')   <p class="mt-1 text-xs text-destructive">{{ $message }}</p> @enderror
                     @error('imagens.*') <p class="mt-1 text-xs text-destructive">{{ $message }}</p> @enderror
                 </div>
@@ -207,6 +227,15 @@
         female:   @json(__('Feminino')),
     };
 
+    // ── Contador de caracteres do tema ─────────────────────
+    const temaEl = document.getElementById('tema');
+    const temaCount = document.getElementById('temaCount');
+    function updateTemaCount() {
+        temaCount.textContent = `${temaEl.value.length} / 2000`;
+    }
+    temaEl.addEventListener('input', updateTemaCount);
+    updateTemaCount();
+
     // ── Duração slider ─────────────────────────────────────
     const duracao = document.getElementById('duracao');
     const durationValue = document.getElementById('durationValue');
@@ -256,14 +285,14 @@
     // ── Vozes por idioma ────────────────────────────────────
     const VOICES = {
         'PT-BR': [
-            { id: 'pt-BR-AntonioNeural',  name: 'Antonio',   gender: T.male   },
-            { id: 'pt-BR-FranciscaNeural', name: 'Francisca', gender: T.female },
-            { id: 'pt-BR-ThalitaNeural',   name: 'Thalita',   gender: T.female },
+            { id: 'pf_dora',  name: 'Dora',  gender: T.female },
+            { id: 'pm_alex',  name: 'Alex',  gender: T.male   },
+            { id: 'pm_santa', name: 'Santa', gender: T.male   },
         ],
         'EN-US': [
-            { id: 'en-US-AndrewNeural', name: 'Andrew', gender: T.male   },
-            { id: 'en-US-AriaNeural',   name: 'Aria',   gender: T.female },
-            { id: 'en-US-GuyNeural',    name: 'Guy',    gender: T.male   },
+            { id: 'af_heart',   name: 'Heart',   gender: T.female },
+            { id: 'af_bella',   name: 'Bella',   gender: T.female },
+            { id: 'am_michael', name: 'Michael', gender: T.male   },
         ],
     };
 
@@ -361,5 +390,129 @@
     idiomaSelect.addEventListener('change', renderVoices);
     renderVoices();
     syncSources();
+
+    // ── Upload de imagens com drag-and-drop para reordenar ──
+    const imagensInput   = document.getElementById('imagens');
+    const imagensGridEl  = document.getElementById('imagensGrid');
+    const imgDropZone    = document.getElementById('imagensDropZone');
+    const imgAddMoreBtn  = document.getElementById('imagensAddMore');
+
+    let imageEntries = []; // [{file, previewUrl}]
+    let dragFromIndex = null;
+
+    function imgAddFiles(fileList) {
+        const newFiles = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+        if (!newFiles.length) return;
+        if (imageEntries.length + newFiles.length > 20) {
+            alert('Máximo de 20 imagens.');
+            return;
+        }
+        newFiles.forEach(f => imageEntries.push({ file: f, previewUrl: URL.createObjectURL(f) }));
+        imgSyncAndRender();
+    }
+
+    function imgSyncAndRender() {
+        const dt = new DataTransfer();
+        imageEntries.forEach(e => dt.items.add(e.file));
+        imagensInput.files = dt.files;
+        imgRenderGrid();
+    }
+
+    function imgRenderGrid() {
+        imagensGridEl.innerHTML = '';
+        const has = imageEntries.length > 0;
+        imgDropZone.classList.toggle('hidden', has);
+        imgAddMoreBtn.classList.toggle('hidden', !has);
+
+        imageEntries.forEach((entry, idx) => {
+            const el = document.createElement('div');
+            el.className = 'img-sortable relative group rounded-sm border border-border overflow-hidden bg-accent transition-all';
+            el.style.width = '72px';
+            el.style.height = '128px';
+            el.draggable = true;
+            el.dataset.idx = idx;
+
+            el.innerHTML =
+                '<div class="h-full w-full cursor-grab active:cursor-grabbing">' +
+                    '<img src="' + entry.previewUrl + '" class="h-full w-full object-cover pointer-events-none" draggable="false">' +
+                '</div>' +
+                '<div style="position:absolute;top:2px;left:2px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:9999px;background:rgba(0,0,0,0.75);color:#fff;font-size:10px;font-weight:700;pointer-events:none;z-index:5;">' + (idx + 1) + '</div>' +
+                '<button type="button" draggable="false" class="img-rm" title="Remover" style="position:absolute;top:2px;right:2px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:9999px;background:#dc2626;color:#fff;border:2px solid #fff;cursor:pointer;padding:0;z-index:10;box-shadow:0 1px 3px rgba(0,0,0,0.5);">' +
+                    '<svg style="width:10px;height:10px;pointer-events:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                '</button>';
+
+            // Drag start
+            el.addEventListener('dragstart', (e) => {
+                dragFromIndex = idx;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', '');
+                requestAnimationFrame(() => el.classList.add('opacity-30', 'scale-95'));
+            });
+            el.addEventListener('dragend', () => {
+                el.classList.remove('opacity-30', 'scale-95');
+                dragFromIndex = null;
+                document.querySelectorAll('.img-sortable').forEach(c => c.classList.remove('ring-2', 'ring-primary'));
+            });
+
+            // Drag over / drop
+            el.addEventListener('dragover', (e) => {
+                if (dragFromIndex === null) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                el.classList.add('ring-2', 'ring-primary');
+            });
+            el.addEventListener('dragleave', () => el.classList.remove('ring-2', 'ring-primary'));
+            el.addEventListener('drop', (e) => {
+                e.preventDefault();
+                el.classList.remove('ring-2', 'ring-primary');
+                if (dragFromIndex === null || dragFromIndex === idx) return;
+                const [moved] = imageEntries.splice(dragFromIndex, 1);
+                imageEntries.splice(idx, 0, moved);
+                dragFromIndex = null;
+                imgSyncAndRender();
+            });
+
+            // Remove button — stop drag from hijacking the click
+            const rmBtn = el.querySelector('.img-rm');
+            rmBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+            rmBtn.addEventListener('dragstart', (e) => { e.preventDefault(); e.stopPropagation(); });
+            rmBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                URL.revokeObjectURL(entry.previewUrl);
+                imageEntries.splice(idx, 1);
+                imgSyncAndRender();
+            });
+
+            imagensGridEl.appendChild(el);
+        });
+    }
+
+    // Drop zone: click
+    imgDropZone.addEventListener('click', () => imagensInput.click());
+
+    // Drop zone: file drag from desktop
+    imgDropZone.addEventListener('dragover', (e) => { e.preventDefault(); imgDropZone.classList.add('border-primary', 'bg-accent/60'); });
+    imgDropZone.addEventListener('dragleave', () => imgDropZone.classList.remove('border-primary', 'bg-accent/60'));
+    imgDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        imgDropZone.classList.remove('border-primary', 'bg-accent/60');
+        imgAddFiles(e.dataTransfer.files);
+    });
+
+    // Add more button
+    imgAddMoreBtn.addEventListener('click', () => {
+        const tmp = document.createElement('input');
+        tmp.type = 'file'; tmp.accept = 'image/*'; tmp.multiple = true;
+        tmp.addEventListener('change', () => imgAddFiles(tmp.files));
+        tmp.click();
+    });
+
+    // Native input change (from drop zone click)
+    imagensInput.addEventListener('change', () => {
+        if (imagensInput.files.length && !imageEntries.length) {
+            imgAddFiles(imagensInput.files);
+        }
+    });
 </script>
 @endpush

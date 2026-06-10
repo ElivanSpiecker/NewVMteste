@@ -21,11 +21,18 @@ class Video extends Model
         'video_path',
         'srt_path',
         'thumbnail_path',
+        'narracao_path',
+        'musica_path',
+        'imagens_paths',
     ];
 
     protected $attributes = [
         'status'    => 'pending',
         'progresso' => 0,
+    ];
+
+    protected $casts = [
+        'imagens_paths' => 'array',
     ];
 
     public function isProcessing(): bool

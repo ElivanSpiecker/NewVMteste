@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\VoiceController;
-use App\Jobs\GerarVideo;
+use App\Http\Requests\StoreVideoRequest;
 use App\Models\Video;
+use App\Services\VideoCreationService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ApiVideoController extends Controller
@@ -20,76 +18,9 @@ class ApiVideoController extends Controller
         return response()->json(['data' => $videos]);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreVideoRequest $request, VideoCreationService $service): JsonResponse
     {
-        $data = $request->validate([
-            'tema'           => ['required', 'string', 'max:200'],
-            'duracao'        => ['required', 'integer', 'min:15', 'max:120'],
-            'idioma'         => ['nullable', 'in:PT-BR,EN-US'],
-            'voz'            => ['nullable', Rule::in(VoiceController::allVoiceIds())],
-            'imagens_modo'   => ['nullable', 'in:gerar,upload'],
-            'narracao_modo'  => ['nullable', 'in:gerar,upload,nenhum'],
-            'musica_modo'    => ['nullable', 'in:gerar,upload,nenhum'],
-            'legendas_modo'  => ['nullable', 'in:gerar,upload,nenhum'],
-            'imagens'        => ['required_if:imagens_modo,upload', 'array', 'min:1', 'max:20'],
-            'imagens.*'      => ['file', 'mimes:jpg,jpeg,png,webp,bmp', 'max:10240'],
-            'narracao'       => ['required_if:narracao_modo,upload', 'file', 'mimes:mp3,wav,m4a,ogg,aac,flac', 'max:51200'],
-            'musica'         => ['required_if:musica_modo,upload',   'file', 'mimes:mp3,wav,m4a,ogg,aac,flac', 'max:102400'],
-            'legendas'       => ['required_if:legendas_modo,upload', 'file', 'mimes:srt,vtt,txt',              'max:2048'],
-        ]);
-
-        $video = Video::create([
-            'tema'           => $data['tema'],
-            'duracao'        => $data['duracao'],
-            'idioma'         => $data['idioma'] ?? 'PT-BR',
-            'voz'            => $data['voz'] ?? null,
-            'imagens_modo'   => $data['imagens_modo']  ?? 'gerar',
-            'narracao_modo'  => $data['narracao_modo'] ?? 'gerar',
-            'musica_modo'    => $data['musica_modo']   ?? 'gerar',
-            'legendas_modo'  => $data['legendas_modo'] ?? 'gerar',
-        ]);
-
-        $uploadDir = storage_path("app/uploads/{$video->id}");
-
-        if (($data['imagens_modo'] ?? null) === 'upload') {
-            $destImg = "{$uploadDir}/imagens";
-            if (!is_dir($destImg)) {
-                mkdir($destImg, 0755, true);
-            }
-            foreach ($request->file('imagens', []) as $i => $file) {
-                $ext = strtolower($file->getClientOriginalExtension() ?: 'png');
-                $file->move($destImg, sprintf('cena%02d.%s', $i + 1, $ext));
-            }
-        }
-
-        if (($data['narracao_modo'] ?? null) === 'upload') {
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            $file = $request->file('narracao');
-            $ext = strtolower($file->getClientOriginalExtension() ?: 'mp3');
-            $file->move($uploadDir, "narracao.{$ext}");
-        }
-
-        if (($data['musica_modo'] ?? null) === 'upload') {
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            $file = $request->file('musica');
-            $ext = strtolower($file->getClientOriginalExtension() ?: 'mp3');
-            $file->move($uploadDir, "musica.{$ext}");
-        }
-
-        if (($data['legendas_modo'] ?? null) === 'upload') {
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            $file = $request->file('legendas');
-            $ext = strtolower($file->getClientOriginalExtension() ?: 'srt');
-            $file->move($uploadDir, "legenda.{$ext}");
-        }
-
-        GerarVideo::dispatch($video->id)->onQueue('video-generation');
+        $video = $service->create($request->videoAttributes(), $request);
 
         return response()->json(['data' => $this->transform($video)], 201);
     }

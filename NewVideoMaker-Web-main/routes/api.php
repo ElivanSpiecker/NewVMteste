@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/health',                [ApiHealthController::class, 'index']);
 
 Route::get('/videos',                [ApiVideoController::class, 'index']);
-Route::post('/videos',               [ApiVideoController::class, 'store']);
+Route::post('/videos',               [ApiVideoController::class, 'store'])->middleware('throttle:video-creation');
 Route::get('/videos/{video}',        [ApiVideoController::class, 'show']);
 Route::delete('/videos/{video}',     [ApiVideoController::class, 'destroy']);
 Route::get('/videos/{video}/download',  [ApiVideoController::class, 'download']);

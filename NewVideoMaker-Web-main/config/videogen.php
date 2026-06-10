@@ -26,7 +26,7 @@ return [
     ),
 
     /*
-     * Python do venv do Kokoro (onde edge_tts está instalado — usado para preview de vozes).
+     * Python do venv do Kokoro TTS (gera a narração e as amostras de voz, 100% local).
      */
     'python_kokoro' => env(
         'VIDEOGEN_PYTHON_KOKORO',

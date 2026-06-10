@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\VoiceController;
-use App\Jobs\GerarVideo;
+use App\Http\Requests\StoreVideoRequest;
 use App\Models\Video;
+use App\Services\VideoCreationService;
+use App\Services\VideoRegenerationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -41,77 +42,9 @@ class VideoController extends Controller
         return view('videos.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreVideoRequest $request, VideoCreationService $service): RedirectResponse
     {
-        $data = $request->validate([
-            'tema'           => ['required', 'string', 'max:200'],
-            'duracao'        => ['required', 'integer', 'min:15', 'max:120'],
-            'idioma'         => ['required', 'in:PT-BR,EN-US'],
-            'voz'            => ['nullable', Rule::in(VoiceController::allVoiceIds())],
-            'imagens_modo'   => ['required', 'in:gerar,upload'],
-            'narracao_modo'  => ['required', 'in:gerar,upload,nenhum'],
-            'musica_modo'    => ['required', 'in:gerar,upload,nenhum'],
-            'legendas_modo'  => ['required', 'in:gerar,upload,nenhum'],
-            'imagens'        => ['required_if:imagens_modo,upload', 'array', 'min:1', 'max:20'],
-            'imagens.*'      => ['file', 'mimes:jpg,jpeg,png,webp,bmp', 'max:10240'],
-            'narracao'       => ['required_if:narracao_modo,upload', 'file', 'mimes:mp3,wav,m4a,ogg,aac,flac', 'max:51200'],
-            'musica'         => ['required_if:musica_modo,upload',   'file', 'mimes:mp3,wav,m4a,ogg,aac,flac', 'max:102400'],
-            'legendas'       => ['required_if:legendas_modo,upload', 'file', 'mimes:srt,vtt,txt',              'max:2048'],
-        ]);
-
-        $video = Video::create([
-            'tema'           => $data['tema'],
-            'duracao'        => $data['duracao'],
-            'idioma'         => $data['idioma'],
-            'voz'            => $data['voz'] ?? null,
-            'imagens_modo'   => $data['imagens_modo'],
-            'narracao_modo'  => $data['narracao_modo'],
-            'musica_modo'    => $data['musica_modo'],
-            'legendas_modo'  => $data['legendas_modo'],
-        ]);
-
-        // Salva uploads em storage/app/uploads/{id}/ — paths absolutos são passados ao pipeline pelo Job
-        $uploadDir = storage_path("app/uploads/{$video->id}");
-
-        if ($data['imagens_modo'] === 'upload') {
-            $destImg = "{$uploadDir}/imagens";
-            if (!is_dir($destImg)) {
-                mkdir($destImg, 0755, true);
-            }
-            foreach ($request->file('imagens', []) as $i => $file) {
-                $ext = strtolower($file->getClientOriginalExtension() ?: 'png');
-                $file->move($destImg, sprintf('cena%02d.%s', $i + 1, $ext));
-            }
-        }
-
-        if ($data['narracao_modo'] === 'upload') {
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            $file = $request->file('narracao');
-            $ext = strtolower($file->getClientOriginalExtension() ?: 'mp3');
-            $file->move($uploadDir, "narracao.{$ext}");
-        }
-
-        if ($data['musica_modo'] === 'upload') {
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            $file = $request->file('musica');
-            $ext = strtolower($file->getClientOriginalExtension() ?: 'mp3');
-            $file->move($uploadDir, "musica.{$ext}");
-        }
-
-        if ($data['legendas_modo'] === 'upload') {
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            $file = $request->file('legendas');
-            $ext = strtolower($file->getClientOriginalExtension() ?: 'srt');
-            $file->move($uploadDir, "legenda.{$ext}");
-        }
-
-        GerarVideo::dispatch($video->id)->onQueue('video-generation');
+        $video = $service->create($request->videoAttributes(), $request);
 
         return redirect()->route('videos.status', $video);
     }
@@ -154,5 +87,84 @@ class VideoController extends Controller
         abort_unless(file_exists($video->srt_path), 404);
 
         return response()->download($video->srt_path, "legenda_{$video->id}.srt");
+    }
+
+    public function thumbnail(Video $video): BinaryFileResponse
+    {
+        $path = $video->thumbnail_path;
+
+        // Fallback para vídeos antigos: usa a primeira imagem persistida.
+        if (!$path || !file_exists($path)) {
+            $imagens = $video->imagens_paths ?? [];
+            $path = $imagens[0] ?? null;
+        }
+
+        abort_unless($path && file_exists($path), 404);
+
+        return response()->file($path, [
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
+    public function destroy(Video $video): RedirectResponse
+    {
+        // Não permite excluir vídeo em processamento (evita race com o worker).
+        if ($video->isProcessing()) {
+            return redirect()
+                ->route('videos.index')
+                ->with('error', __('Não é possível excluir um vídeo em processamento.'));
+        }
+
+        // Remove arquivos persistidos e diretórios de upload/artifacts.
+        foreach ([$video->video_path, $video->srt_path] as $path) {
+            if ($path && file_exists($path)) {
+                @unlink($path);
+            }
+        }
+
+        $this->removeDir(storage_path("app/uploads/{$video->id}"));
+        $this->removeDir(storage_path("app/artifacts/{$video->id}"));
+
+        $video->delete();
+
+        return redirect()
+            ->route('videos.index')
+            ->with('success', __('Vídeo excluído com sucesso.'));
+    }
+
+    private function removeDir(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+        $items = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($items as $item) {
+            $item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
+        }
+        @rmdir($dir);
+    }
+
+    public function regenerate(Video $video, Request $request, VideoRegenerationService $service): RedirectResponse
+    {
+        abort_unless($video->isDone(), 404);
+
+        $data = $request->validate([
+            'keep'           => ['nullable', 'array'],
+            'keep.*'         => ['in:imagens,narracao,musica'],
+            'voz'            => ['nullable', Rule::in(VoiceController::allVoiceIds())],
+            'idioma'         => ['nullable', 'in:PT-BR,EN-US'],
+        ]);
+
+        $overrides = array_filter([
+            'voz'    => $data['voz']    ?? null,
+            'idioma' => $data['idioma'] ?? null,
+        ], fn ($v) => $v !== null);
+
+        $novo = $service->regenerate($video, $data['keep'] ?? [], $overrides);
+
+        return redirect()->route('videos.status', $novo);
     }
 }

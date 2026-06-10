@@ -14,14 +14,14 @@ class VoiceController extends Controller
      */
     public const VOICES = [
         'PT-BR' => [
-            ['id' => 'pt-BR-AntonioNeural',   'name' => 'Antonio',   'gender' => 'Masculino'],
-            ['id' => 'pt-BR-FranciscaNeural',  'name' => 'Francisca', 'gender' => 'Feminino'],
-            ['id' => 'pt-BR-ThalitaNeural',    'name' => 'Thalita',   'gender' => 'Feminino'],
+            ['id' => 'pf_dora',  'name' => 'Dora',  'gender' => 'Feminino'],
+            ['id' => 'pm_alex',  'name' => 'Alex',  'gender' => 'Masculino'],
+            ['id' => 'pm_santa', 'name' => 'Santa', 'gender' => 'Masculino'],
         ],
         'EN-US' => [
-            ['id' => 'en-US-AndrewNeural', 'name' => 'Andrew', 'gender' => 'Male'],
-            ['id' => 'en-US-AriaNeural',   'name' => 'Aria',   'gender' => 'Female'],
-            ['id' => 'en-US-GuyNeural',    'name' => 'Guy',    'gender' => 'Male'],
+            ['id' => 'af_heart',   'name' => 'Heart',   'gender' => 'Female'],
+            ['id' => 'af_bella',   'name' => 'Bella',   'gender' => 'Female'],
+            ['id' => 'am_michael', 'name' => 'Michael', 'gender' => 'Male'],
         ],
     ];
 
@@ -68,7 +68,7 @@ class VoiceController extends Controller
             ]);
         }
 
-        // Gera a amostra via Python (Kokoro venv tem edge_tts)
+        // Gera a amostra via Python (Kokoro TTS, local)
         $pythonKokoro = config('videogen.python_kokoro',
             'C:\\Users\\nicol\\PycharmProjects\\Kokoro\\venv\\Scripts\\python.exe'
         );
@@ -78,10 +78,13 @@ class VoiceController extends Controller
 
         $process = new Process(
             command: [$pythonKokoro, $scriptPath, $voiceId, $mp3Path],
-            env: [
+            // Herda o ambiente completo (SystemRoot/PATH são essenciais no Windows —
+            // sem SystemRoot o Python falha em _Py_HashRandomization_Init) e só
+            // sobrescreve o encoding.
+            env: array_merge(getenv(), [
                 'PYTHONIOENCODING' => 'utf-8',
                 'PYTHONUTF8'       => '1',
-            ],
+            ]),
         );
         $process->setTimeout(30);
         $process->run();

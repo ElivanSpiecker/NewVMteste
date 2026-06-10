@@ -16,6 +16,17 @@
         </a>
     </div>
 
+    @if (session('success'))
+        <div class="mt-6 rounded-sm border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-foreground">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="mt-6 rounded-sm border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="mt-8 flex flex-wrap items-center gap-3">
         @foreach ([__('Todos'), __('Concluídos'), __('Em processamento'), __('Com erro')] as $index => $filter)
             <button type="button" data-filter="{{ $filter }}" class="video-filter rounded-sm px-3 py-1.5 font-display text-[10px] font-medium tracking-wider uppercase transition-colors {{ $index === 0 ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground' }}">
@@ -43,11 +54,16 @@
                     'processing' => __('Em processamento'),
                     default => __('Com erro'),
                 };
-                $thumb = asset('assets/frame-' . (($loop->iteration - 1) % 6 + 1) . '.jpg');
+                $thumbCandidate = $video->thumbnail_path
+                    ?: (($video->imagens_paths[0] ?? null));
+                $hasRealThumb = $thumbCandidate && file_exists($thumbCandidate);
+                $thumb = $hasRealThumb
+                    ? route('videos.thumbnail', $video)
+                    : asset('assets/frame-' . (($loop->iteration - 1) % 6 + 1) . '.jpg');
             @endphp
             <article data-title="{{ strtolower($video->tema) }}" data-status="{{ $filterKey }}" class="video-card group overflow-hidden rounded-sm border border-border bg-card transition-transform duration-300 hover:-translate-y-1">
                 <div class="relative aspect-[4/3] overflow-hidden bg-accent">
-                    <img src="{{ $thumb }}" alt="{{ $video->tema }}" class="h-full w-full object-cover grayscale transition-all duration-300 group-hover:scale-105 group-hover:grayscale-0">
+                    <img src="{{ $thumb }}" alt="{{ $video->tema }}" loading="lazy" class="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 {{ $hasRealThumb ? '' : 'grayscale group-hover:grayscale-0' }}">
                     <div class="absolute right-2 top-2 rounded-sm px-2 py-0.5 font-display text-[10px] tracking-wider uppercase {{ $statusClass }}">
                         {{ $video->statusLabel() }}
                     </div>
@@ -64,12 +80,21 @@
                         <span>•</span>
                         <span>{{ $video->idioma ?? 'PT-BR' }}</span>
                     </div>
-                    <div class="mt-3 flex flex-wrap gap-2">
+                    <div class="mt-3 flex flex-wrap items-center gap-2">
                         <a href="{{ $video->isDone() ? route('videos.show', $video) : route('videos.status', $video) }}" class="flex items-center gap-1 rounded-sm border border-border px-2.5 py-1.5 text-[10px] font-medium text-foreground transition-colors hover:bg-accent"><i data-lucide="eye" class="h-3 w-3"></i> {{ __('Ver') }}</a>
                         @if ($video->isDone())
                             <a href="{{ route('videos.download', $video) }}" class="flex items-center gap-1 rounded-sm border border-border px-2.5 py-1.5 text-[10px] font-medium text-foreground transition-colors hover:bg-accent"><i data-lucide="download" class="h-3 w-3"></i> {{ __('Baixar') }}</a>
                             <a href="{{ route('videos.download-srt', $video) }}" class="flex items-center gap-1 rounded-sm border border-border px-2.5 py-1.5 text-[10px] font-medium text-foreground transition-colors hover:bg-accent"><i data-lucide="file-text" class="h-3 w-3"></i> SRT</a>
                         @endif
+                        @unless ($video->isProcessing())
+                            <form action="{{ route('videos.destroy', $video) }}" method="POST" class="ml-auto js-delete-video" data-tema="{{ $video->tema }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" title="{{ __('Excluir vídeo') }}" class="flex items-center gap-1 rounded-sm border border-border px-2.5 py-1.5 text-[10px] font-medium text-muted-foreground transition-colors hover:border-destructive hover:bg-destructive hover:text-destructive-foreground">
+                                    <i data-lucide="trash-2" class="h-3 w-3"></i>
+                                </button>
+                            </form>
+                        @endunless
                     </div>
                 </div>
             </article>
@@ -113,5 +138,17 @@
     });
 
     searchInput?.addEventListener('input', applyFilters);
+
+    // Confirmação de exclusão
+    const CONFIRM_DELETE = @json(__('Excluir o vídeo ":tema"? Esta ação não pode ser desfeita.'));
+    document.querySelectorAll('form.js-delete-video').forEach((form) => {
+        form.addEventListener('submit', (e) => {
+            const tema = form.dataset.tema || '';
+            const msg = CONFIRM_DELETE.replace(':tema', tema);
+            if (!confirm(msg)) {
+                e.preventDefault();
+            }
+        });
+    });
 </script>
 @endpush
