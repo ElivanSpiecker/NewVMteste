@@ -15,7 +15,7 @@
         </span>
     </div>
 
-    <div id="servicesList" class="mt-10 grid gap-5 lg:grid-cols-3">
+    <div id="servicesList" class="mt-10 grid gap-5 lg:grid-cols-2">
         @foreach ($services as $service)
             <article class="service-card card" data-port="{{ $service['port'] }}">
                 <div class="flex items-start justify-between gap-4">
@@ -58,7 +58,7 @@
 
     <section class="card mt-8">
         <h2 class="section-title">{{ __('Inicialização dos serviços') }}</h2>
-        <div class="mt-4 grid gap-4 lg:grid-cols-3">
+        <div class="mt-4 grid gap-4 lg:grid-cols-2">
             <div>
                 <p class="text-sm font-medium text-foreground">Ollama</p>
                 <code class="mt-2 block rounded-sm bg-accent p-3 text-xs text-muted-foreground">ollama serve</code>
@@ -66,10 +66,6 @@
             <div>
                 <p class="text-sm font-medium text-foreground">ComfyUI</p>
                 <code class="mt-2 block rounded-sm bg-accent p-3 text-xs text-muted-foreground">python main.py --lowvram</code>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-foreground">ACE-Step</p>
-                <code class="mt-2 block rounded-sm bg-accent p-3 text-xs text-muted-foreground">uv run python gradio_app.py</code>
             </div>
         </div>
     </section>

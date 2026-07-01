@@ -27,14 +27,6 @@ class HealthController extends Controller
             'probe'   => '/system_stats',
             'install' => 'https://github.com/comfyanonymous/ComfyUI/releases',
         ],
-        [
-            'key'     => 'acestep',
-            'name'    => 'ACE-Step (Música)',
-            'host'    => '127.0.0.1',
-            'port'    => 7860,
-            'probe'   => '/',
-            'install' => 'https://github.com/ace-step/ACE-Step',
-        ],
     ];
 
     public function __construct(private readonly AppConfig $appConfig)

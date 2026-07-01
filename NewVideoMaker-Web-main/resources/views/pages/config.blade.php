@@ -107,7 +107,7 @@
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="section-title">{{ __('Serviços locais') }}</h2>
-                    <p class="mt-1 text-xs text-muted-foreground">{{ __('ComfyUI, ACE-Step e Ollama precisam estar rodando para gerar vídeos.') }}</p>
+                    <p class="mt-1 text-xs text-muted-foreground">{{ __('ComfyUI e Ollama precisam estar rodando para gerar vídeos.') }}</p>
                 </div>
                 <a href="{{ route('health.index') }}" class="btn-outline">{{ __('Detalhes') }}</a>
             </div>

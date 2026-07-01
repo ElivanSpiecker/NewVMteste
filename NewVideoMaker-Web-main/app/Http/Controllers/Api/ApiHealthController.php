@@ -10,7 +10,6 @@ class ApiHealthController extends Controller
     private array $services = [
         ['name' => 'Ollama (Gemma 4)',  'host' => '127.0.0.1', 'port' => 11434],
         ['name' => 'ComfyUI (FLUX)',    'host' => '127.0.0.1', 'port' => 8188],
-        ['name' => 'ACE-Step (Música)', 'host' => '127.0.0.1', 'port' => 7860],
     ];
 
     public function index(): JsonResponse
